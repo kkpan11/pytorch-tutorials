@@ -9,6 +9,7 @@ Autograd
 BCE
 BFGS
 BLAS
+BLEU
 BN
 BOS
 BT
@@ -34,6 +35,7 @@ Chatbots
 Chen
 Colab
 Colorectal
+Composibility
 Conda
 Conv
 ConvNet
@@ -70,6 +72,7 @@ FLAVA
 FSDP
 FX
 FX's
+FairSeq
 Fastpath
 FloydHub
 FloydHub's
@@ -139,6 +142,7 @@ MNIST
 MUC
 MacBook
 MacOS
+MaskRCNN
 Minifier
 MobileNet
 ModelABC
@@ -173,6 +177,7 @@ OpenSlide
 Opset
 Ornstein
 PIL
+PIL's
 PPO
 PatchPredictor
 PennFudan
@@ -182,6 +187,7 @@ Pohjonen
 Prec
 Profiler
 PyTorch's
+QuickStart
 RCNN
 RGB
 RGBA
@@ -196,6 +202,7 @@ RTX
 Radford
 ReLU
 ReLUs
+ResNeXt
 ResNet
 Resampling
 Runtime's
@@ -203,6 +210,7 @@ SDPA
 SGD
 SIMD
 SPD
+SQuAD
 SSD
 SSL
 SST2
@@ -246,6 +254,7 @@ VLDB
 VQA
 VS Code
 ViT
+WMT
 WSI
 WSIs
 WSI’s
@@ -253,6 +262,7 @@ Wang
 Wikitext
 Woohoo
 XLM
+Xception
 Xcode
 Xeon
 Yidong
@@ -270,6 +280,7 @@ approximators
 autodiff
 autoencoder
 autograd
+autotune
 autotuner
 backend
 backends
@@ -281,6 +292,7 @@ backpropagation
 backtrace
 batchnorm
 batchnorm's
+bbAP
 benchmarked
 benchmarking
 bitwise
@@ -303,6 +315,7 @@ composable
 concat
 conda
 config
+configs
 contrastive
 conv
 convolutional
@@ -323,6 +336,7 @@ dataset’s
 deallocation
 decompositions
 decorrelated
+devicemesh
 deserialize
 deserialized
 desynchronization
@@ -334,6 +348,7 @@ distractor
 downsample
 downsamples
 dropdown
+dtensor
 duration
 elementwise
 embeddings
@@ -361,6 +376,7 @@ fuser
 geomean
 globals
 grayscale
+handoff
 hardcode
 helpdesk
 helpdesks
@@ -430,6 +446,7 @@ multithreading
 namespace
 natively
 ndarrays
+nightlies
 num
 numericalize
 numpy
@@ -469,6 +486,7 @@ prespecified
 pretrained
 prewritten
 primals
+processgroup
 profiler
 profilers
 protobuf
@@ -490,6 +508,7 @@ relu
 reproducibility
 rescale
 rescaling
+reshard
 resnet
 restride
 rewinded
@@ -502,8 +521,14 @@ runtime
 runtime
 runtimes
 scalable
+sharded
+Sharding
 softmax
+sparsified
+sparsifier
+sparsifiers
 sparsify
+sparsifying
 specificities
 src
 stacktrace
@@ -513,11 +538,14 @@ strided
 stroma
 subclasses
 subclassing
+subcomponent
+subcomponents
 subdirectories
 subfolder
 submodule
 submodules
 subnetworks
+subproblems
 subprocess
 subprocesses
 subreddit
@@ -551,6 +579,7 @@ torchviz
 traceback
 tradeoff
 tradeoffs
+triton
 uint
 umap
 uncomment
