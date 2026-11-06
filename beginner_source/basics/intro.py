@@ -13,9 +13,9 @@ Learn the Basics
 ===================
 
 Authors:
-`Suraj Subramanian <https://github.com/suraj813>`_,
+`Suraj Subramanian <https://github.com/subramen>`_,
 `Seth Juarez <https://github.com/sethjuarez/>`_,
-`Cassie Breviu <https://github.com/cassieview/>`_,
+`Cassie Breviu <https://github.com/cassiebreviu/>`_,
 `Dmitry Soshnikov <https://soshnikov.com/>`_,
 `Ari Bornstein <https://github.com/aribornstein/>`_
 
@@ -34,8 +34,8 @@ Running the Tutorial Code
 -------------------------
 You can run this tutorial in a couple of ways:
 
-- **In the cloud**: This is the easiest way to get started! Each section has a "Run in Microsoft Learn" and "Run in Google Colab" link at the top, which opens an integrated notebook in Microsoft Learn or Google Colab, respectively, with the code in a fully-hosted environment.
-- **Locally**: This option requires you to setup PyTorch and TorchVision first on your local machine (`installation instructions <https://pytorch.org/get-started/locally/>`_). Download the notebook or copy the code into your favorite IDE.
+- **In the cloud**: This is the easiest way to get started! Each section has a "Run in Google Colab" link at the top, which opens an integrated notebook in Google Colab with the code in a fully-hosted environment.
+- **Locally**: This option requires you to set up PyTorch and TorchVision first on your local machine (`installation instructions <https://pytorch.org/get-started/locally/>`_). Download the notebook or copy the code into your favorite IDE.
 
 
 How to Use this Guide
@@ -43,12 +43,22 @@ How to Use this Guide
 If you're familiar with other deep learning frameworks, check out the `0. Quickstart <quickstart_tutorial.html>`_ first
 to quickly familiarize yourself with PyTorch's API.
 
-If you're new to deep learning frameworks, head right into the first section of our step-by-step guide: `1. Tensors <tensor_tutorial.html>`_.
+If you're new to deep learning frameworks, head right into the first section of our step-by-step guide: `1. Tensors <tensorqs_tutorial.html>`_.
 
 
 .. include:: /beginner_source/basics/qs_toc.txt
 
 .. toctree::
+   :maxdepth: 2
    :hidden:
+
+   quickstart_tutorial
+   tensorqs_tutorial
+   data_tutorial
+   transforms_tutorial
+   buildmodel_tutorial
+   autogradqs_tutorial
+   optimization_tutorial
+   saveloadrun_tutorial
 
 """

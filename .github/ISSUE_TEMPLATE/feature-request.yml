@@ -8,7 +8,7 @@ labels: [
 body:
 - type: textarea
   attributes:
-    label: 🚀 Descirbe the improvement or the new tutorial
+    label: 🚀 Describe the improvement or the new tutorial
     description: |
       **Describe the improvement**
     placeholder: |
@@ -18,7 +18,7 @@ body:
 - type: textarea
   attributes:
     label: Existing tutorials on this topic
-    description: | 
+    description: |
       **Add a list of existing tutorials on the same topic.**
     placeholder: |
       List tutorials that already explain this functionality if exist. On pytorch.org or elsewhere.

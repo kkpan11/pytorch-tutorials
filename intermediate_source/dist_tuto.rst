@@ -38,7 +38,7 @@ simultaneously. If you have access to compute cluster you should check
 with your local sysadmin or use your favorite coordination tool (e.g.,
 `pdsh <https://linux.die.net/man/1/pdsh>`__,
 `clustershell <https://cea-hpc.github.io/clustershell/>`__, or
-`others <https://slurm.schedmd.com/>`__). For the purpose of this
+`slurm <https://slurm.schedmd.com/>`__). For the purpose of this
 tutorial, we will use a single machine and spawn multiple processes using
 the following template.
 
@@ -47,6 +47,7 @@ the following template.
     """run.py:"""
     #!/usr/bin/env python
     import os
+    import sys
     import torch
     import torch.distributed as dist
     import torch.multiprocessing as mp
@@ -64,11 +65,15 @@ the following template.
 
 
     if __name__ == "__main__":
-        size = 2
+        world_size = 2
         processes = []
-        mp.set_start_method("spawn")
-        for rank in range(size):
-            p = mp.Process(target=init_process, args=(rank, size, run))
+        if "google.colab" in sys.modules:
+            print("Running in Google Colab")
+            mp.get_context("spawn")
+        else:
+            mp.set_start_method("spawn")
+        for rank in range(world_size):
+            p = mp.Process(target=init_process, args=(rank, world_size, run))
             p.start()
             processes.append(p)
 
@@ -125,7 +130,7 @@ process 0 increments the tensor and sends it to process 1 so that they
 both end up with 1.0. Notice that process 1 needs to allocate memory in
 order to store the data it will receive.
 
-Also notice that ``send``/``recv`` are **blocking**: both processes stop
+Also notice that ``send/recv`` are **blocking**: both processes block
 until the communication is completed. On the other hand immediates are
 **non-blocking**; the script continues its execution and the methods
 return a ``Work`` object upon which we can choose to
@@ -156,7 +161,8 @@ we should not modify the sent tensor nor access the received tensor before ``req
 In other words,
 
 -  writing to ``tensor`` after ``dist.isend()`` will result in undefined behaviour.
--  reading from ``tensor`` after ``dist.irecv()`` will result in undefined behaviour.
+- reading from ``tensor`` after ``dist.irecv()`` will result in undefined
+  behaviour, until ``req.wait()`` has been executed.
 
 However, after ``req.wait()``
 has been executed we are guaranteed that the communication took place,
@@ -219,16 +225,23 @@ to obtain the sum of all tensors on all processes, we can use the
 Since we want the sum of all tensors in the group, we use
 ``dist.ReduceOp.SUM`` as the reduce operator. Generally speaking, any
 commutative mathematical operation can be used as an operator.
-Out-of-the-box, PyTorch comes with 4 such operators, all working at the
+Out-of-the-box, PyTorch comes with many such operators, all working at the
 element-wise level:
 
 -  ``dist.ReduceOp.SUM``,
 -  ``dist.ReduceOp.PRODUCT``,
 -  ``dist.ReduceOp.MAX``,
--  ``dist.ReduceOp.MIN``.
+-  ``dist.ReduceOp.MIN``,
+-  ``dist.ReduceOp.BAND``,
+-  ``dist.ReduceOp.BOR``,
+-  ``dist.ReduceOp.BXOR``,
+-  ``dist.ReduceOp.PREMUL_SUM``.
 
-In addition to ``dist.all_reduce(tensor, op, group)``, there are a total
-of 6 collectives currently implemented in PyTorch.
+The full list of supported operators is
+`here <https://pytorch.org/docs/stable/distributed.html#torch.distributed.ReduceOp>`__.
+
+In addition to ``dist.all_reduce(tensor, op, group)``, there are many additional collectives currently implemented in
+PyTorch. Here are a few supported collectives.
 
 -  ``dist.broadcast(tensor, src, group)``: Copies ``tensor`` from
    ``src`` to all other processes.
@@ -244,6 +257,12 @@ of 6 collectives currently implemented in PyTorch.
 -  ``dist.all_gather(tensor_list, tensor, group)``: Copies ``tensor``
    from all processes to ``tensor_list``, on all processes.
 -  ``dist.barrier(group)``: Blocks all processes in `group` until each one has entered this function.
+-  ``dist.all_to_all(output_tensor_list, input_tensor_list, group)``: Scatters list of input tensors to all processes in
+   a group and return gathered list of tensors in output list.
+
+The full list of supported collectives can be found by looking at the latest documentation for PyTorch Distributed
+`(link) <https://pytorch.org/docs/stable/distributed.html>`__.
+
 
 Distributed Training
 --------------------
@@ -275,7 +294,7 @@ gradients of their model on their batch of data and then average their
 gradients. In order to ensure similar convergence results when changing
 the number of processes, we will first have to partition our dataset.
 (You could also use
-`tnt.dataset.SplitDataset <https://github.com/pytorch/tnt/blob/master/torchnet/dataset/splitdataset.py#L4>`__,
+`torch.utils.data.random_split <https://pytorch.org/docs/stable/data.html#torch.utils.data.random_split>`__,
 instead of the snippet below.)
 
 .. code:: python
@@ -300,7 +319,7 @@ instead of the snippet below.)
         def __init__(self, data, sizes=[0.7, 0.2, 0.1], seed=1234):
             self.data = data
             self.partitions = []
-            rng = Random()
+            rng = Random()  # from random import Random
             rng.seed(seed)
             data_len = len(data)
             indexes = [x for x in range(0, data_len)]
@@ -327,7 +346,7 @@ the following few lines:
                                      transforms.Normalize((0.1307,), (0.3081,))
                                  ]))
         size = dist.get_world_size()
-        bsz = 128 / float(size)
+        bsz = 128 // size
         partition_sizes = [1.0 / size for _ in range(size)]
         partition = DataPartitioner(dataset, partition_sizes)
         partition = partition.use(dist.get_rank())
@@ -389,7 +408,7 @@ could train any model on a large computer cluster.
 lot more tricks <https://seba-1511.github.io/dist_blog>`__ required to
 implement a production-level implementation of synchronous SGD. Again,
 use what `has been tested and
-optimized <https://pytorch.org/docs/stable/nn.html#torch.nn.parallel.DistributedDataParallel>`__.
+optimized <https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel>`__.
 
 Our Own Ring-Allreduce
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -451,8 +470,10 @@ Communication Backends
 
 One of the most elegant aspects of ``torch.distributed`` is its ability
 to abstract and build on top of different backends. As mentioned before,
-there are currently three backends implemented in PyTorch: Gloo, NCCL, and
-MPI. They each have different specifications and tradeoffs, depending
+there are multiple backends implemented in PyTorch. These backends can be easily selected
+using the `Accelerator API <https://pytorch.org/docs/stable/torch.html#accelerators>`__,
+which provides a interface for working with different accelerator types.
+Some of the most popular backends are Gloo, NCCL, and MPI. They each have different specifications and tradeoffs, depending
 on the desired use case. A comparative table of supported functions can
 be found
 `here <https://pytorch.org/docs/stable/distributed.html#module-torch.distributed>`__.
@@ -472,12 +493,13 @@ distributed SGD example does not work if you put ``model`` on the GPU.
 In order to use multiple GPUs, let us also make the following
 modifications:
 
-1.  Use ``device = torch.device("cuda:{}".format(rank))``
-2. ``model = Net()`` :math:`\rightarrow` ``model = Net().to(device)``
-3.  Use ``data, target = data.to(device), target.to(device)``
+1. Use Accelerator API ``device_type = torch.accelerator.current_accelerator()``
+2. Use ``torch.device(f"{device_type}:{rank}")``
+3. ``model = Net()`` :math:`\rightarrow` ``model = Net().to(device)``
+4.  Use ``data, target = data.to(device), target.to(device)``
 
-With the above modifications, our model is now training on two GPUs and
-you can monitor their utilization with ``watch nvidia-smi``.
+With these modifications, your model will now train across two GPUs.
+You can monitor GPU utilization using ``watch nvidia-smi`` if you are running on NVIDIA hardware.
 
 **MPI Backend**
 
@@ -533,6 +555,7 @@ more <https://www.open-mpi.org/faq/?category=running#mpirun-hostfile>`__)
 Doing so, you should obtain the same familiar output as with the other
 communication backends.
 
+
 **NCCL Backend**
 
 The `NCCL backend <https://github.com/nvidia/nccl>`__ provides an
@@ -541,18 +564,26 @@ tensors. If you only use CUDA tensors for your collective operations,
 consider using this backend for the best in class performance. The
 NCCL backend is included in the pre-built binaries with CUDA support.
 
+**XCCL Backend**
+
+The `XCCL backend` offers an optimized implementation of collective operations for XPU tensors.
+If your workload uses only XPU tensors for collective operations,
+this backend provides best-in-class performance.
+The XCCL backend is included in the pre-built binaries with XPU support.
+
+
 Initialization Methods
 ~~~~~~~~~~~~~~~~~~~~~~
 
-To finish this tutorial, let's talk about the very first function we
-called: ``dist.init_process_group(backend, init_method)``. In
-particular, we will go over the different initialization methods which
-are responsible for the initial coordination step between each process.
-Those methods allow you to define how this coordination is done.
-Depending on your hardware setup, one of these methods should be
-naturally more suitable than the others. In addition to the following
-sections, you should also have a look at the `official
-documentation <https://pytorch.org/docs/stable/distributed.html#initialization>`__.
+To conclude this tutorial, let's examine the initial function we invoked:
+``dist.init_process_group(backend, init_method)``. Specifically, we will discuss the various
+initialization methods responsible for the preliminary coordination step between each process.
+These methods enable you to define how this coordination is accomplished.
+
+The choice of initialization method depends on your hardware setup, and one method may be more
+suitable than others. In addition to the following sections, please refer to the `official
+documentation <https://pytorch.org/docs/stable/distributed.html#initialization>`__ for further information.
+
 
 **Environment Variable**
 
@@ -569,7 +600,7 @@ finally handshake with them.
 -  ``WORLD_SIZE``: The total number of processes, so that the master
    knows how many workers to wait for.
 -  ``RANK``: Rank of each process, so they will know whether it is the
-   master of a worker.
+   master or a worker.
 
 **Shared File System**
 

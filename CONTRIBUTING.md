@@ -71,8 +71,7 @@ There are three types of tutorial content that we host on
   reStructuredText files. The build system only converts them into HTML;
   the code in them does not run on build. These tutorials are easier to
   create and maintain but they do not provide an interactive experience.
-  An example is the [Dynamic Quantization
-  tutorial](https://pytorch.org/tutorials/recipes/recipes/dynamic_quantization.html).
+
 
 * **Recipes** are tutorials that provide bite-sized, actionable
   examples of how to use specific features, which differentiates them
@@ -162,7 +161,7 @@ Write for a global audience with an instructive and directive voice.
 
 - PyTorch has a global audience; use clear, easy to understand
   language. Avoid idioms or other figures of speech.
-- To keep your instructions concise, use 
+- To keep your instructions concise, use
   [active voice](https://writing.wisc.edu/handbook/style/ccs_activevoice/) as much as possible.
 - For a short guide on the essentials of writing style,
   [The Elements of Style](https://www.gutenberg.org/files/37134/37134-h/37134-h.htm)
@@ -218,9 +217,8 @@ described in the preceding sections:
 - [NLP From Scratch: Generating Names with a Character-Level RNN
 Tutorial](https://pytorch.org/tutorials/intermediate/char_rnn_generation_tutorial.html)
 
-If you are creating a recipe, we recommend that you use [this
-template](https://github.com/pytorch/tutorials/blob/tutorials_refresh/recipes_source/recipes/example_recipe.py)
-as a guide.
+If you are creating a recipe, [this is a good
+example.](https://github.com/pytorch/tutorials/blob/main/recipes_source/recipes/what_is_state_dict.py)
 
 
 # Submission Process #
@@ -261,12 +259,12 @@ For Python files, our CI system runs your code during each build.
 
 In order for your tutorial to appear on the website, and through tag
 search, you need to include it in `index.rst`, or for recipes, in
-`recipes_index.rst`. 
+`recipes_index.rst`.
 
 1. Open the relevant file
    [`index.rst`](https://github.com/pytorch/tutorials/blob/main/index.rst)
    or
-   [`recipes_index.rst`](https://github.com/pytorch/tutorials/blob/main/recipes_source/recipes_index.rst)
+   [`recipes_index.rst`](https://github.com/pytorch/tutorials/blob/main/recipes_index.rst)
 1. Add a _card_ in reStructuredText format similar to the following:
 
 ```
@@ -326,9 +324,9 @@ example](https://github.com/pytorch/tutorials/blob/main/_static/img/thumbnails/c
 
 The following command builds an HTML version of the tutorial website.
 
-    ```
-    make html-noplot
-    ```
+```
+make html-noplot
+```
 
 This command does not run your tutorial code. To build the tutorial in a
 way that executes the code, use `make docs`. However, unless you have a
@@ -358,13 +356,12 @@ Submit the changes as a PR to the main branch of
 1. Address all feedback comments from your reviewers.
 1. Make sure all CI checks are passing.
 
-Once you submit your PR, you can see a generated Netlify preview of your
-build. You can see an example Netlify preview at the following URL:
-
->  <https://deploy-preview-954--pytorch-tutorials-preview.netlify.app/>
-
+Once you submit your PR, you can see a preview of your
+build, titled "Preview Python docs built from this PR", under Helpful Links.
+This preview will show you how your tutorial will appear on the website,
+but it is not the final version. The final version will be published
+after the PR is merged.
 
 ## Do not merge the PR yourself ##
 
 Please **DO NOT MERGE** your own PR; the tutorial won't be published. In order to avoid potential build breaks with the tutorials site, only certain maintainers can authorize publishing.
-

@@ -4,7 +4,6 @@ Facilitating New Backend Integration by PrivateUse1
 In this tutorial we will walk through some necessary steps to integrate a new backend
 living outside ``pytorch/pytorch`` repo by ``PrivateUse1``. Note that this tutorial assumes that
 you already have a basic understanding of PyTorch.
-you are an advanced user of PyTorch.
 
 .. note::
 
@@ -226,7 +225,7 @@ The primary goal of integrating new devices through ``PrivateUse1`` is to meet t
 and the next thing to do is to improve usability, which mainly involves the following aspects.
 
 1. Register new backend module to Pytorch.
-2. Generate methods and properties related to the new backend.
+2. Rename PrivateUse1 to a custom name for the new backend.
 3. Generate methods and properties related to the new backend.
 
 Register new backend module to Pytorch

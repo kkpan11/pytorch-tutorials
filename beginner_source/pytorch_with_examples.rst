@@ -26,6 +26,12 @@ between the network output and the true output.
    You can browse the individual examples at the
    :ref:`end of this page <examples-download>`.
 
+To run the tutorials below, make sure you have the `torch`_
+and `numpy`_ packages installed.
+
+.. _torch: https://github.com/pytorch/pytorch
+.. _numpy: https://github.com/numpy/numpy
+
 .. contents:: Table of Contents
    :local:
 
@@ -149,7 +155,7 @@ which will be optimized during learning.
 
 In TensorFlow, packages like
 `Keras <https://github.com/fchollet/keras>`__,
-`TensorFlow-Slim <https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim>`__,
+`TensorFlow-Slim <https://github.com/google-research/tf-slim>`__,
 and `TFLearn <http://tflearn.org/>`__ provide higher-level abstractions
 over raw computational graphs that are useful for building neural
 networks.
@@ -217,6 +223,8 @@ We can easily implement this model as a Module subclass:
 .. includenodoc:: /beginner/examples_nn/dynamic_net.py
 
 
+
+
 .. _examples-download:
 
 Examples
@@ -229,7 +237,6 @@ Tensors
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
 
    /beginner/examples_tensor/polynomial_numpy
    /beginner/examples_tensor/polynomial_tensor
@@ -247,7 +254,6 @@ Autograd
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
 
    /beginner/examples_autograd/polynomial_autograd
    /beginner/examples_autograd/polynomial_custom_function
@@ -266,7 +272,6 @@ Autograd
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
 
    /beginner/examples_nn/polynomial_nn
    /beginner/examples_nn/polynomial_optim

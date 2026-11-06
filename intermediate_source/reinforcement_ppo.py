@@ -25,12 +25,12 @@ Key learnings:
 
 We will cover six crucial components of TorchRL:
 
-* `environments <https://pytorch.org/rl/reference/envs.html>`__
-* `transforms <https://pytorch.org/rl/reference/envs.html#transforms>`__
-* `models (policy and value function) <https://pytorch.org/rl/reference/modules.html>`__
-* `loss modules <https://pytorch.org/rl/reference/objectives.html>`__
-* `data collectors <https://pytorch.org/rl/reference/collectors.html>`__
-* `replay buffers <https://pytorch.org/rl/reference/data.html#replay-buffers>`__
+* `environments <https://docs.pytorch.org/rl/stable/reference/envs.html>`__
+* `transforms <https://docs.pytorch.org/rl/stable/reference/envs.html#transforms>`__
+* `models (policy and value function) <https://docs.pytorch.org/rl/stable/reference/modules.html>`__
+* `loss modules <https://docs.pytorch.org/rl/stable/reference/objectives.html>`__
+* `data collectors <https://docs.pytorch.org/rl/stable/reference/collectors.html>`__
+* `replay buffers <https://docs.pytorch.org/rl/stable/reference/data.html#replay-buffers>`__
 
 """
 
@@ -104,11 +104,11 @@ We will cover six crucial components of TorchRL:
 # description and more about the algorithm itself.
 #
 
-# sphinx_gallery_start_ignore
 import warnings
-
 warnings.filterwarnings("ignore")
 from torch import multiprocessing
+
+# sphinx_gallery_start_ignore
 
 # TorchRL prefers spawn method, that restricts creation of  ``~torchrl.envs.ParallelEnv`` inside
 # `__main__` method call, but for the easy of reading the code switch to fork
@@ -419,8 +419,8 @@ policy_module = ProbabilisticActor(
     in_keys=["loc", "scale"],
     distribution_class=TanhNormal,
     distribution_kwargs={
-        "min": env.action_spec.space.low,
-        "max": env.action_spec.space.high,
+        "low": env.action_spec.space.low,
+        "high": env.action_spec.space.high,
     },
     return_log_prob=True,
     # we'll need the log-prob for the numerator of the importance weights
@@ -466,7 +466,7 @@ print("Running value:", value_module(env.reset()))
 # Data collector
 # --------------
 #
-# TorchRL provides a set of `DataCollector classes <https://pytorch.org/rl/reference/collectors.html>`__.
+# TorchRL provides a set of `DataCollector classes <https://docs.pytorch.org/rl/stable/reference/collectors.html>`__.
 # Briefly, these classes execute three operations: reset an environment,
 # compute an action given the latest observation, execute a step in the environment,
 # and repeat the last two steps until the environment signals a stop (or reaches
@@ -551,7 +551,7 @@ replay_buffer = ReplayBuffer(
 #
 
 advantage_module = GAE(
-    gamma=gamma, lmbda=lmbda, value_network=value_module, average_gae=True
+    gamma=gamma, lmbda=lmbda, value_network=value_module, average_gae=True, device=device,
 )
 
 loss_module = ClipPPOLoss(
@@ -639,7 +639,7 @@ for i, tensordict_data in enumerate(collector):
         # number of steps (1000, which is our ``env`` horizon).
         # The ``rollout`` method of the ``env`` can take a policy as argument:
         # it will then execute this policy at each step.
-        with set_exploration_type(ExplorationType.MEAN), torch.no_grad():
+        with set_exploration_type(ExplorationType.DETERMINISTIC), torch.no_grad():
             # execute a rollout with the trained policy
             eval_rollout = env.rollout(1000, policy_module)
             logs["eval reward"].append(eval_rollout["next", "reward"].mean().item())

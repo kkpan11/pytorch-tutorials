@@ -48,7 +48,7 @@ Datasets & DataLoaders
 import torch
 from torch.utils.data import Dataset
 from torchvision import datasets
-from torchvision.transforms import ToTensor
+from torchvision.transforms import v2
 import matplotlib.pyplot as plt
 
 
@@ -56,14 +56,14 @@ training_data = datasets.FashionMNIST(
     root="data",
     train=True,
     download=True,
-    transform=ToTensor()
+    transform=v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])
 )
 
 test_data = datasets.FashionMNIST(
     root="data",
     train=False,
     download=True,
-    transform=ToTensor()
+    transform=v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])
 )
 
 
@@ -120,7 +120,7 @@ plt.show()
 
 import os
 import pandas as pd
-from torchvision.io import read_image
+from torchvision.io import decode_image
 
 class CustomImageDataset(Dataset):
     def __init__(self, annotations_file, img_dir, transform=None, target_transform=None):
@@ -134,7 +134,7 @@ class CustomImageDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-        image = read_image(img_path)
+        image = decode_image(img_path)
         label = self.img_labels.iloc[idx, 1]
         if self.transform:
             image = self.transform(image)
@@ -184,13 +184,13 @@ def __len__(self):
 # ^^^^^^^^^^^^^^^^^^^^
 #
 # The __getitem__ function loads and returns a sample from the dataset at the given index ``idx``.
-# Based on the index, it identifies the image's location on disk, converts that to a tensor using ``read_image``, retrieves the
+# Based on the index, it identifies the image's location on disk, converts that to a tensor using ``decode_image``, retrieves the
 # corresponding label from the csv data in ``self.img_labels``, calls the transform functions on them (if applicable), and returns the
 # tensor image and corresponding label in a tuple.
 
 def __getitem__(self, idx):
     img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-    image = read_image(img_path)
+    image = decode_image(img_path)
     label = self.img_labels.iloc[idx, 1]
     if self.transform:
         image = self.transform(image)

@@ -45,26 +45,43 @@ import torch.nn.functional as F
 class Net(nn.Module):
 
     def __init__(self):
-        super(Net, self).__init__()
+        super().__init__()
         # 1 input image channel, 6 output channels, 5x5 square convolution
         # kernel
         self.conv1 = nn.Conv2d(1, 6, 5)
         self.conv2 = nn.Conv2d(6, 16, 5)
         # an affine operation: y = Wx + b
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)  # 5*5 from image dimension 
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)  # 5*5 from image dimension
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
 
-    def forward(self, x):
-        # Max pooling over a (2, 2) window
-        x = F.max_pool2d(F.relu(self.conv1(x)), (2, 2))
-        # If the size is a square, you can specify with a single number
-        x = F.max_pool2d(F.relu(self.conv2(x)), 2)
-        x = torch.flatten(x, 1) # flatten all dimensions except the batch dimension
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+    def forward(self, input):
+        # Convolution layer C1: 1 input image channel, 6 output channels,
+        # 5x5 square convolution, it uses RELU activation function, and
+        # outputs a Tensor with size (N, 6, 28, 28), where N is the size of the batch
+        c1 = F.relu(self.conv1(input))
+        # Subsampling layer S2: 2x2 grid, purely functional,
+        # this layer does not have any parameter, and outputs a (N, 6, 14, 14) Tensor
+        s2 = F.max_pool2d(c1, (2, 2))
+        # Convolution layer C3: 6 input channels, 16 output channels,
+        # 5x5 square convolution, it uses RELU activation function, and
+        # outputs a (N, 16, 10, 10) Tensor
+        c3 = F.relu(self.conv2(s2))
+        # Subsampling layer S4: 2x2 grid, purely functional,
+        # this layer does not have any parameter, and outputs a (N, 16, 5, 5) Tensor
+        s4 = F.max_pool2d(c3, 2)
+        # Flatten operation: purely functional, outputs a (N, 400) Tensor
+        s4 = torch.flatten(s4, 1)
+        # Fully connected layer F5: (N, 400) Tensor input,
+        # and outputs a (N, 120) Tensor, it uses RELU activation function
+        f5 = F.relu(self.fc1(s4))
+        # Fully connected layer F6: (N, 120) Tensor input,
+        # and outputs a (N, 84) Tensor, it uses RELU activation function
+        f6 = F.relu(self.fc2(f5))
+        # Fully connected layer OUTPUT: (N, 84) Tensor input, and
+        # outputs a (N, 10) Tensor
+        output = self.fc3(f6)
+        return output
 
 
 net = Net()
@@ -188,7 +205,9 @@ print(loss.grad_fn.next_functions[0][0].next_functions[0][0])  # ReLU
 #
 #
 # Now we shall call ``loss.backward()``, and have a look at conv1's bias
-# gradients before and after the backward.
+# gradients before and after the backward. Since we have not introduced an
+# optimizer yet, we clear the gradients directly on the model. Once using an
+# optimizer, prefer ``optimizer.zero_grad()`` as shown below.
 
 
 net.zero_grad()     # zeroes the gradient buffers of all parameters
@@ -229,7 +248,8 @@ print(net.conv1.bias.grad)
 #
 #     learning_rate = 0.01
 #     for f in net.parameters():
-#         f.data.sub_(f.grad.data * learning_rate)
+#         with torch.no_grad():
+#             f -= f.grad * learning_rate
 #
 # However, as you use neural networks, you want to use various different
 # update rules such as SGD, Nesterov-SGD, Adam, RMSProp, etc.

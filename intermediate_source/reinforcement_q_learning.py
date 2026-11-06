@@ -9,6 +9,8 @@ Reinforcement Learning (DQN) Tutorial
 This tutorial shows how to use PyTorch to train a Deep Q Learning (DQN) agent
 on the CartPole-v1 task from `Gymnasium <https://gymnasium.farama.org>`__.
 
+You might find it helpful to read the original `Deep Q Learning (DQN) <https://arxiv.org/abs/1312.5602>`__ paper
+
 **Task**
 
 The agent has to decide between two actions - moving the cart left or
@@ -83,7 +85,29 @@ if is_ipython:
 plt.ion()
 
 # if GPU is to be used
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device(
+    "cuda" if torch.cuda.is_available() else
+    "mps" if torch.backends.mps.is_available() else
+    "cpu"
+)
+
+
+# To ensure reproducibility during training, you can fix the random seeds
+# by uncommenting the lines below. This makes the results consistent across
+# runs, which is helpful for debugging or comparing different approaches.
+#
+# That said, allowing randomness can be beneficial in practice, as it lets
+# the model explore different training trajectories.
+
+
+# seed = 42
+# random.seed(seed)
+# torch.manual_seed(seed)
+# env.reset(seed=seed)
+# env.action_space.seed(seed)
+# env.observation_space.seed(seed)
+# if torch.cuda.is_available(): 
+#     torch.cuda.manual_seed(seed)
 
 
 ######################################################################
@@ -227,7 +251,7 @@ class DQN(nn.Module):
 # This cell instantiates our model and its optimizer, and defines some
 # utilities:
 #
-# -  ``select_action`` - will select an action accordingly to an epsilon
+# -  ``select_action`` - will select an action according to an epsilon
 #    greedy policy. Simply put, we'll sometimes use our model for choosing
 #    the action, and sometimes we'll just sample one uniformly. The
 #    probability of choosing a random action will start at ``EPS_START``
@@ -247,13 +271,15 @@ class DQN(nn.Module):
 # EPS_DECAY controls the rate of exponential decay of epsilon, higher means a slower decay
 # TAU is the update rate of the target network
 # LR is the learning rate of the ``AdamW`` optimizer
+
 BATCH_SIZE = 128
 GAMMA = 0.99
 EPS_START = 0.9
-EPS_END = 0.05
-EPS_DECAY = 1000
+EPS_END = 0.01
+EPS_DECAY = 2500
 TAU = 0.005
-LR = 1e-4
+LR = 3e-4
+
 
 # Get number of actions from gym action space
 n_actions = env.action_space.n
@@ -397,7 +423,7 @@ def optimize_model():
 # can produce better results if convergence is not observed.
 #
 
-if torch.cuda.is_available():
+if torch.cuda.is_available() or torch.backends.mps.is_available():
     num_episodes = 600
 else:
     num_episodes = 50

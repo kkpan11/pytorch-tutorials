@@ -7,11 +7,12 @@
 What is Distributed Data Parallel (DDP)
 =======================================
 
-Authors: `Suraj Subramanian <https://github.com/suraj813>`__
+Authors: `Suraj Subramanian <https://github.com/subramen>`__
 
 .. grid:: 2
 
    .. grid-item-card:: :octicon:`mortar-board;1em;` What you will learn
+      :class-card: card-prerequisites
 
       *  How DDP works under the hood
       *  What is ``DistributedSampler``
@@ -19,6 +20,7 @@ Authors: `Suraj Subramanian <https://github.com/suraj813>`__
 
 
    .. grid-item-card:: :octicon:`list-unordered;1em;` Prerequisites
+      :class-card: card-prerequisites
 
       * Familiarity with `basic non-distributed training  <https://pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html>`__ in PyTorch
 

@@ -26,7 +26,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import datasets
-from torchvision.transforms import ToTensor
+from torchvision.transforms import v2
 
 ######################################################################
 # PyTorch offers domain-specific libraries such as `TorchText <https://pytorch.org/text/stable/index.html>`_,
@@ -43,7 +43,7 @@ training_data = datasets.FashionMNIST(
     root="data",
     train=True,
     download=True,
-    transform=ToTensor(),
+    transform=v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]),
 )
 
 # Download test data from open datasets.
@@ -51,7 +51,7 @@ test_data = datasets.FashionMNIST(
     root="data",
     train=False,
     download=True,
-    transform=ToTensor(),
+    transform=v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]),
 )
 
 ######################################################################
@@ -84,16 +84,10 @@ for X, y in test_dataloader:
 # To define a neural network in PyTorch, we create a class that inherits
 # from `nn.Module <https://pytorch.org/docs/stable/generated/torch.nn.Module.html>`_. We define the layers of the network
 # in the ``__init__`` function and specify how data will pass through the network in the ``forward`` function. To accelerate
-# operations in the neural network, we move it to the GPU or MPS if available.
+# operations in the neural network, we move it to the `accelerator <https://pytorch.org/docs/stable/torch.html#accelerators>`__
+# such as CUDA, MPS, MTIA, or XPU. If the current accelerator is available, we will use it. Otherwise, we use the CPU.
 
-# Get cpu, gpu or mps device for training.
-device = (
-    "cuda"
-    if torch.cuda.is_available()
-    else "mps"
-    if torch.backends.mps.is_available()
-    else "cpu"
-)
+device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
 print(f"Using {device} device")
 
 # Define model
@@ -216,7 +210,7 @@ print("Saved PyTorch Model State to model.pth")
 # the state dictionary into it.
 
 model = NeuralNetwork().to(device)
-model.load_state_dict(torch.load("model.pth"))
+model.load_state_dict(torch.load("model.pth", weights_only=True))
 
 #############################################################
 # This model can now be used to make predictions.

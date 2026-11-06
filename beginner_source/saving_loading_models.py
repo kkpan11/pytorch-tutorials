@@ -153,7 +153,7 @@ functions to be familiar with:
 # .. code:: python
 #
 #    model = TheModelClass(*args, **kwargs)
-#    model.load_state_dict(torch.load(PATH))
+#    model.load_state_dict(torch.load(PATH, weights_only=True))
 #    model.eval()
 #
 # .. note::
@@ -206,7 +206,7 @@ functions to be familiar with:
 # .. code:: python
 #
 #    # Model class must be defined somewhere
-#    model = torch.load(PATH)
+#    model = torch.load(PATH, weights_only=False)
 #    model.eval()
 #
 # This save/load process uses the most intuitive syntax and involves the
@@ -227,43 +227,30 @@ functions to be familiar with:
 # normalization layers to evaluation mode before running inference.
 # Failing to do this will yield inconsistent inference results.
 #
-# Export/Load Model in TorchScript Format
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Saving an Exported Program
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# One common way to do inference with a trained model is to use
-# `TorchScript <https://pytorch.org/docs/stable/jit.html>`__, an intermediate
-# representation of a PyTorch model that can be run in Python as well as in a
-# high performance environment like C++. TorchScript is actually the recommended model format
-# for scaled inference and deployment.
+# If you are using ``torch.export``, you can save and load your ``ExportedProgram`` using the
+# ``torch.export.save()`` and ``torch.export.load()`` APIs. with the ``.pt2`` file extension:
 #
-# .. note::
-#    Using the TorchScript format, you will be able to load the exported model and
-#    run inference without defining the model class.
+# .. code-block:: python
+# 
+#    class SimpleModel(torch.nn.Module):
+#         def forward(self, x):
+#             return x + 10
 #
-# **Export:**
+#    # Create a sample input
+#    sample_input = torch.randn(5)
+# 
+#    # Export the model
+#    exported_program = torch.export.export(SimpleModel(), sample_input)
 #
-# .. code:: python
+#    # Save the exported program
+#    torch.export.save(exported_program, 'exported_program.pt2')
 #
-#    model_scripted = torch.jit.script(model) # Export to TorchScript
-#    model_scripted.save('model_scripted.pt') # Save
+#    # Load the exported program
+#    saved_exported_program = torch.export.load('exported_program.pt2')
 #
-# **Load:**
-#
-# .. code:: python
-#
-#    model = torch.jit.load('model_scripted.pt')
-#    model.eval()
-#
-# Remember that you must call ``model.eval()`` to set dropout and batch
-# normalization layers to evaluation mode before running inference.
-# Failing to do this will yield inconsistent inference results.
-#
-# For more information on TorchScript, feel free to visit the dedicated
-# `tutorials <https://pytorch.org/tutorials/beginner/Intro_to_TorchScript_tutorial.html>`__.
-# You will get familiar with the tracing conversion and learn how to
-# run a TorchScript module in a `C++ environment <https://pytorch.org/tutorials/advanced/cpp_export.html>`__.
-
-
 
 ######################################################################
 # Saving & Loading a General Checkpoint for Inference and/or Resuming Training
@@ -290,7 +277,7 @@ functions to be familiar with:
 #    model = TheModelClass(*args, **kwargs)
 #    optimizer = TheOptimizerClass(*args, **kwargs)
 #
-#    checkpoint = torch.load(PATH)
+#    checkpoint = torch.load(PATH, weights_only=True)
 #    model.load_state_dict(checkpoint['model_state_dict'])
 #    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 #    epoch = checkpoint['epoch']
@@ -354,7 +341,7 @@ functions to be familiar with:
 #    optimizerA = TheOptimizerAClass(*args, **kwargs)
 #    optimizerB = TheOptimizerBClass(*args, **kwargs)
 #
-#    checkpoint = torch.load(PATH)
+#    checkpoint = torch.load(PATH, weights_only=True)
 #    modelA.load_state_dict(checkpoint['modelA_state_dict'])
 #    modelB.load_state_dict(checkpoint['modelB_state_dict'])
 #    optimizerA.load_state_dict(checkpoint['optimizerA_state_dict'])
@@ -407,7 +394,7 @@ functions to be familiar with:
 # .. code:: python
 #
 #    modelB = TheModelBClass(*args, **kwargs)
-#    modelB.load_state_dict(torch.load(PATH), strict=False)
+#    modelB.load_state_dict(torch.load(PATH, weights_only=True), strict=False)
 #
 # Partially loading a model or loading a partial model are common
 # scenarios when transfer learning or training a new complex model.
@@ -446,7 +433,7 @@ functions to be familiar with:
 #
 #    device = torch.device('cpu')
 #    model = TheModelClass(*args, **kwargs)
-#    model.load_state_dict(torch.load(PATH, map_location=device))
+#    model.load_state_dict(torch.load(PATH, map_location=device, weights_only=True))
 #
 # When loading a model on a CPU that was trained with a GPU, pass
 # ``torch.device('cpu')`` to the ``map_location`` argument in the
@@ -469,7 +456,7 @@ functions to be familiar with:
 #
 #    device = torch.device("cuda")
 #    model = TheModelClass(*args, **kwargs)
-#    model.load_state_dict(torch.load(PATH))
+#    model.load_state_dict(torch.load(PATH, weights_only=True))
 #    model.to(device)
 #    # Make sure to call input = input.to(device) on any input tensors that you feed to the model
 #
@@ -497,7 +484,7 @@ functions to be familiar with:
 #
 #    device = torch.device("cuda")
 #    model = TheModelClass(*args, **kwargs)
-#    model.load_state_dict(torch.load(PATH, map_location="cuda:0"))  # Choose whatever GPU device number you want
+#    model.load_state_dict(torch.load(PATH, weights_only=True, map_location="cuda:0"))  # Choose whatever GPU device number you want
 #    model.to(device)
 #    # Make sure to call input = input.to(device) on any input tensors that you feed to the model
 #
